@@ -16,4 +16,9 @@ public interface UserDao {
     List<User> getAllUsers();
 
     void cleanUsersTable();
-}
+
+    String toString();
+
+    }
+
+

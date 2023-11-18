@@ -4,10 +4,7 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.ConnectionManager;
 
 import javax.persistence.Table;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +18,15 @@ public class UserDaoJDBCImpl implements UserDao {
                 " name text not null, " +
                 "lastName text not null, " +
                 "age smallint not null)";
-        try{
+        try {
             Statement statement = connection.createStatement();
-        statement.executeQuery(table);
-        }
-        catch (Exception exception){
+            statement.executeQuery(table);
+            statement.close();
+            connection.close();
+
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
-
 
     }
 
@@ -38,8 +36,9 @@ public class UserDaoJDBCImpl implements UserDao {
         try {
             Statement statement = connection.createStatement();
             statement.executeQuery(delete);
-        }
-        catch (Exception exception) {
+            statement.close();
+            connection.close();
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
     }
@@ -53,11 +52,11 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
-        }
-        catch (Exception exception){
+            connection.close();
+            preparedStatement.close();
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
-
 
 
     }
@@ -69,8 +68,9 @@ public class UserDaoJDBCImpl implements UserDao {
             PreparedStatement preparedStatement = connection.prepareStatement(remove);
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-        }
-        catch (Exception exception) {
+            connection.close();
+            preparedStatement.close();
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
     }
@@ -90,8 +90,9 @@ public class UserDaoJDBCImpl implements UserDao {
                 User user = new User(id, name, lastName, age);
                 users.add(user);
             }
-        }
-        catch (Exception exception){
+            connection.close();
+            statement.close();
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
         return users;
@@ -104,9 +105,21 @@ public class UserDaoJDBCImpl implements UserDao {
         try {
             Statement statement = connection.createStatement();
             statement.executeQuery(clean);
-        }
-        catch (Exception exception) {
+            statement.close();
+            connection.close();
+        } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
     }
+
+    public String toString() {
+        List<User> e = getAllUsers();
+        String s = new String();
+        for (User user : e) {
+            s += user + "\n";
+        }
+        System.out.println(e);
+        return s;
+    }
+
 }
