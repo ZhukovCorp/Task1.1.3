@@ -1,9 +1,8 @@
 package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
-import jm.task.core.jdbc.util.ConnectionManager;
+import jm.task.core.jdbc.util.Util;
 
-import javax.persistence.Table;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +12,16 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        Connection connection = ConnectionManager.open();
         String table = "Create table IF NOT EXISTS users (id bigserial primary key," +
                 " name text not null, " +
                 "lastName text not null, " +
                 "age smallint not null)";
-        try {
-            Statement statement = connection.createStatement();
+        try (
+                Connection connection = Util.open();
+                Statement statement = connection.createStatement();
+        ) {
             statement.executeQuery(table);
-            statement.close();
-            connection.close();
+
 
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
@@ -31,29 +30,29 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        Connection connection = ConnectionManager.open();
+
         String delete = "Drop table IF EXISTS users";
-        try {
-            Statement statement = connection.createStatement();
+        try (
+                Connection connection = Util.open();
+                Statement statement = connection.createStatement()
+        ) {
             statement.executeQuery(delete);
-            statement.close();
-            connection.close();
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        Connection connection = ConnectionManager.open();
+
         String insert = "insert into users values (default,?,?,?)";
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(insert); // создаем стейтмент, который позволяет добавлять данные в запроос
+        try (
+                Connection connection = Util.open();
+                PreparedStatement preparedStatement = connection.prepareStatement(insert) // создаем стейтмент, который позволяет добавлять данные в запроос
+        ) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
-            connection.close();
-            preparedStatement.close();
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
@@ -62,25 +61,25 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        Connection connection = ConnectionManager.open();
         String remove = "delete from users where id = ?";
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(remove);
+        try (
+                Connection connection = Util.open();
+                PreparedStatement preparedStatement = connection.prepareStatement(remove)
+        ) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-            connection.close();
-            preparedStatement.close();
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
     }
 
     public List<User> getAllUsers() {
-        Connection connection = ConnectionManager.open();
         String query = "Select * from users";
         List<User> users = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();  //Нужен для того, чтобы выполнить запрос и получить результат
+        try (
+                Connection connection = Util.open();
+                Statement statement = connection.createStatement() //Нужен для того, чтобы выполнить запрос и получить результат
+        ) {
             ResultSet result = statement.executeQuery(query);
             while (result.next()) {
                 long id = result.getLong("id");
@@ -90,8 +89,6 @@ public class UserDaoJDBCImpl implements UserDao {
                 User user = new User(id, name, lastName, age);
                 users.add(user);
             }
-            connection.close();
-            statement.close();
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
@@ -100,13 +97,13 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        Connection connection = ConnectionManager.open();
+
         String clean = "delete from users";
-        try {
-            Statement statement = connection.createStatement();
+        try (
+                Connection connection = Util.open();
+                Statement statement = connection.createStatement()
+        ) {
             statement.executeQuery(clean);
-            statement.close();
-            connection.close();
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
